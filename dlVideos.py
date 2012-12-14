@@ -42,7 +42,8 @@ try:
 			os.makedirs(thisPlaylist["name"])
 	
 	for thisVideo in videos:
-		filePath = "_videos/" + thisVideo["title"]
+		fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
+		filePath = "_videos/" + fileName
 		
 		#'filter(func, list)' returns the item(s) in 'list' for which func(item) is True
 		#'lambda arg: foo' defines an anonymous (unnamed) function that takes 'arg' as an input and returns 'foo'
@@ -90,9 +91,9 @@ try:
 			
 			done.append(thisVideo["pageUrl"])
 		
-		symlinkPath = inPlaylist["name"] + "/" + thisVideo["title"]
-		if ( done.count(thisVideo["pageUrl"]) > 0 ) and ( not os.access(symlinkPath, os.R_OK) ):
-			symlinkTarget = "../_videos/" + thisVideo["title"]
+		symlinkPath = inPlaylist["name"] + "/" + fileName
+		if ( os.access(filePath, os.R_OK) ) and ( not os.access(symlinkPath, os.R_OK) ): #file exists but link does not
+			symlinkTarget = "../_videos/" + fileName
 			print "Symlinking from '" + symlinkPath + "' to '" + symlinkTarget + "'...."
 			os.symlink(symlinkTarget, symlinkPath)
 except:
