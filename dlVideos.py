@@ -43,6 +43,7 @@ try:
 	
 	for thisVideo in videos:
 		fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
+		fileName = fileName.replace("/", "%")
 		filePath = "_videos/" + fileName
 		
 		#'filter(func, list)' returns the item(s) in 'list' for which func(item) is True
