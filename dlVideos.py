@@ -90,8 +90,11 @@ try:
 					pass
 			
 			done.append(thisVideo["pageUrl"])
+		if inPlaylist["name"] == "Liked videos":
+			symlinkPath = inPlaylist["name"] + "/" + fileName
+		else:
+			symlinkPath = inPlaylist["name"] + "/" + str(thisVideo["playlistIndex"]).zfill(3) + " " + fileName
 		
-		symlinkPath = inPlaylist["name"] + "/" + fileName
 		if ( os.access(filePath, os.R_OK) ) and ( not os.access(symlinkPath, os.R_OK) ): #file exists but link does not
 			symlinkTarget = "../_videos/" + fileName
 			print "Symlinking from '" + symlinkPath + "' to '" + symlinkTarget + "'...."
