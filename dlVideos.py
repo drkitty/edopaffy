@@ -3,6 +3,7 @@ import os
 import urllib2
 import json
 import subprocess
+import re
 
 try:
 	videosJson_file = open("videos.json", "r")
@@ -63,34 +64,39 @@ try:
 			print "Downloading to '" + filePath + "'"
 			
 			
-			myProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE)
-			thisVidRawUrl = myProcess.communicate()[0].rstrip("\n")
-			
-			try:
-				f = open(filePath, "w")
-				thing = urllib2.urlopen(thisVidRawUrl)
-				f.write(thing.read())
-			except urllib2.HTTPError as e:
-				if e.code == 404:
+			myProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			myProcessOutput = myProcess.communicate()
+			if re.search(r'404', myProcessOutput[1]) != None: #"404" matches in myProcessOutput[1]
 					print "WARNING: Video has been removed from YouTube or something like that."
 					print "WARNING: Skipping video...."
-					#not fatal!
-				elif e.code == 402:
-					print "FATAL ERROR: YouTube has apparently taken issue with the amount of bandwidth you're using."
-					print "FATAL ERROR: Wait a few minutes and try again."
-					print "FATAL ERROR: Exiting...."
-					raise
-				else:
-					print "FATAL ERROR: Unknown HTTP Error " + str(e.code)
-					raise
-			finally:
+			else:
+				thisVidRawUrl = myProcessOutput[0].rstrip("\n")
+				
 				try:
-					f.close()
-					del f
-				except:
-					pass
-			
-			done.append(thisVideo["pageUrl"])
+					f = open(filePath, "w")
+					thing = urllib2.urlopen(thisVidRawUrl)
+					f.write(thing.read())
+				except urllib2.HTTPError as e:
+					if e.code == 404:
+						print "WARNING: Video has been removed from YouTube or something like that."
+						print "WARNING: Skipping video...."
+						#not fatal!
+					elif e.code == 402:
+						print "FATAL ERROR: YouTube has apparently taken issue with the amount of bandwidth you're using."
+						print "FATAL ERROR: Wait a few minutes and try again."
+						print "FATAL ERROR: Exiting...."
+						raise
+					else:
+						print "FATAL ERROR: Unknown HTTP Error " + str(e.code)
+						raise
+				finally:
+					try:
+						f.close()
+						del f
+					except:
+						pass
+				
+				done.append(thisVideo["pageUrl"])
 		if inPlaylist["name"] == "Liked videos":
 			symlinkPath = inPlaylist["name"] + "/" + fileName
 		else:
