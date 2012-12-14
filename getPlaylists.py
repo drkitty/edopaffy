@@ -14,15 +14,15 @@ def main():
 	myService.ssl = True
 	myService.developer_key = "AI39si6xcOAkaUaIHmKKlktQkNWA3zm6VNErFNK9SLPucmwhtrYPsT-lGYhSPjslE27Z5jSqsxEyWGLi4sRyiy8A2tyfS0xN5w"
 	myService.client_id = "100908745387.apps.googleusercontent.com"
-	myService.email = "electricmuffin11@gmail.com"
+	myService.email = raw_input("Email: ")
 	myService.password = getpass.getpass()
 	myService.ProgrammaticLogin()
 	
 	userEntry = myService.GetYouTubeUserEntry(username="default")
 	userID = re.search(r'(?<=users/).*', userEntry.id.text).group()
 	
-	myVideos = []
-	myPlaylists = []
+	videos = []
+	playlists = []
 	
 	playlistFeed = myService.GetYouTubePlaylistFeed(username="default")
 	for thisPlaylist in playlistFeed.entry:
@@ -35,12 +35,12 @@ def main():
 			p["description"] = ""
 		else:
 			p["description"] = thisPlaylistDescription
-		myPlaylists.append(p)
+		playlists.append(p)
 		
 		print "======" + p["name"] + "======"
 		#thisPlaylistURL = thisPlaylist.id.text
 		thisVidFeed = myService.GetYouTubePlaylistVideoFeed(uri=thisPlaylist.feed_link[0].href)
-		processVidFeed(thisVidFeed, myVideos, p["idOrUrl"], myService)
+		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
 	
 	thisPlaylistID = "FL" + userID
 	thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
@@ -49,9 +49,9 @@ def main():
 	p["idOrUrl"] = thisPlaylistID
 	p["creator"] = thisVidFeed.author[0].name.text
 	p["description"] = ""
-	myPlaylists.append(p)
+	playlists.append(p)
 	
-	processVidFeed(thisVidFeed, myVideos, p["idOrUrl"], myService)
+	processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
 	
 	
 	thisPlaylistID = "LL" + userID
@@ -62,18 +62,18 @@ def main():
 	p["idOrUrl"] = thisPlaylistID
 	p["creator"] = thisVidFeed.author[0].name.text
 	p["description"] = ""
-	myPlaylists.append(p)
+	playlists.append(p)
 	
-	processVidFeed(thisVidFeed, myVideos, p["idOrUrl"], myService)
+	processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
 	
 	
 	
 	videosJson_file = open("videos.json", "w")
-	json.dump(myVideos, videosJson_file, separators=(',', ':'), indent=1)
+	json.dump(videos, videosJson_file, separators=(',', ':'), indent=1)
 	videosJson_file.close()
 	
 	playlistsJson_file = open("playlists.json", "w")
-	json.dump(myPlaylists, playlistsJson_file, separators=(',', ':'), indent=1)
+	json.dump(playlists, playlistsJson_file, separators=(',', ':'), indent=1)
 	playlistsJson_file.close()
 
 
