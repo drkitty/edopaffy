@@ -61,14 +61,14 @@ try:
 			print ""
 			print thisVideo["pageUrl"] + ":"
 			
-			print "Downloading to '" + filePath + "'"
+			print "Downloading to '" + filePath + "'...."
 			
 			
 			myProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			myProcessOutput = myProcess.communicate()
 			if re.search(r'404', myProcessOutput[1]) != None: #"404" matches in myProcessOutput[1]
-					print "WARNING: Video has been removed from YouTube or something like that."
-					print "WARNING: Skipping video...."
+				print "WARNING: Video has been removed from YouTube or something like that."
+				print "WARNING: Skipping video...."
 			else:
 				thisVidRawUrl = myProcessOutput[0].rstrip("\n")
 				

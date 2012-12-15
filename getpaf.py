@@ -88,6 +88,7 @@ def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService):
 				if re.search(r'^https://www.youtube.com/watch', thisVidPageURL_dirty) != None:
 					break
 			v["pageUrl"] = re.search(r'[^&]*', thisVidPageURL_dirty).group()
+			#group() returns the matched string itself
 			v["title"] = thisVid.media.title.text
 			v["uploader"] = thisVid.author[0].name.text
 			v["playlistIndex"] = thisVid.position.text
