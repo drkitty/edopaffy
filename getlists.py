@@ -7,6 +7,7 @@ import os
 import urllib2
 import json
 import getpass
+import sys
 
 
 def main():
@@ -18,66 +19,71 @@ def main():
 	#But please don't do that.)
 	myService.client_id = "100908745387.apps.googleusercontent.com"
 	#Same here.
-	myService.email = raw_input("Email: ") #eventually we might cache this
-	myService.password = getpass.getpass() #not this, though
-	
-	try:
-		myService.ProgrammaticLogin()
-	except:
-		print "FATAL ERROR: Invalid email or password."
-		exit()
-	
-	userEntry = myService.GetYouTubeUserEntry(username="default") #i.e., currently logged-in user (you)
-	userID = re.search(r'(?<=users/).*', userEntry.id.text).group()
 	
 	videos = []
 	playlists = []
 	
-	playlistFeed = myService.GetYouTubePlaylistFeed(username="default")
-	for thisPlaylist in playlistFeed.entry:
+	#START OF PLAYLISTS AND FAVORITES BLOCK
+	if len(sys.argv) == 1 or sys.argv[1] != "nopaf":
+		myService.email = raw_input("Email: ") #eventually we might cache this
+		myService.password = getpass.getpass() #not this, though
+		
+		try:
+			myService.ProgrammaticLogin()
+		except:
+			print "FATAL ERROR: Invalid email or password."
+			exit()
+		
+		userEntry = myService.GetYouTubeUserEntry(username="default") #i.e., currently logged-in user (you)
+		userID = re.search(r'(?<=users/).*', userEntry.id.text).group()
+		
+		
+		playlistFeed = myService.GetYouTubePlaylistFeed(username="default")
+		for thisPlaylist in playlistFeed.entry:
+			p = dict()
+			p["name"] = thisPlaylist.title.text
+			p["idOrUrl"] = thisPlaylist.id.text
+			p["creator"] = thisPlaylist.author[0].name.text
+			thisPlaylistDescription = thisPlaylist.description.text
+			if thisPlaylistDescription == None:
+				p["description"] = ""
+			else:
+				p["description"] = thisPlaylistDescription
+			playlists.append(p)
+			
+			print "======" + p["name"] + "======"
+			thisVidFeed = myService.GetYouTubePlaylistVideoFeed(uri=thisPlaylist.feed_link[0].href)
+			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
+		
+		
+		print "======Favorites======"
+		
+		thisPlaylistID = "FL" + userID
+		thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
 		p = dict()
-		p["name"] = thisPlaylist.title.text
-		p["idOrUrl"] = thisPlaylist.id.text
-		p["creator"] = thisPlaylist.author[0].name.text
-		thisPlaylistDescription = thisPlaylist.description.text
-		if thisPlaylistDescription == None:
-			p["description"] = ""
-		else:
-			p["description"] = thisPlaylistDescription
+		p["name"] = thisVidFeed.title.text
+		p["idOrUrl"] = thisPlaylistID
+		p["creator"] = thisVidFeed.author[0].name.text
+		p["description"] = ""
 		playlists.append(p)
 		
-		print "======" + p["name"] + "======"
-		thisVidFeed = myService.GetYouTubePlaylistVideoFeed(uri=thisPlaylist.feed_link[0].href)
 		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
-	
-	
-	print "======Favorites======"
-	
-	thisPlaylistID = "FL" + userID
-	thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
-	p = dict()
-	p["name"] = thisVidFeed.title.text
-	p["idOrUrl"] = thisPlaylistID
-	p["creator"] = thisVidFeed.author[0].name.text
-	p["description"] = ""
-	playlists.append(p)
-	
-	processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
-	
-	
-	print "======Liked videos======"
-	
-	thisPlaylistID = "LL" + userID
-	thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
-	thisPlaylistTitle = thisVidFeed.title.text
-	p = dict()
-	p["name"] = thisVidFeed.title.text
-	p["idOrUrl"] = thisPlaylistID
-	p["creator"] = thisVidFeed.author[0].name.text
-	p["description"] = ""
-	playlists.append(p)
-	
-	processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
+		
+		
+		print "======Liked videos======"
+		
+		thisPlaylistID = "LL" + userID
+		thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
+		thisPlaylistTitle = thisVidFeed.title.text
+		p = dict()
+		p["name"] = thisVidFeed.title.text
+		p["idOrUrl"] = thisPlaylistID
+		p["creator"] = thisVidFeed.author[0].name.text
+		p["description"] = ""
+		playlists.append(p)
+		
+		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
+	#END OF PLAYLISTS AND FAVORITES BLOCK
 	
 	
 	try:
@@ -110,7 +116,10 @@ def main():
 			print "WARNING: User '" + thisUserName + "' could not be found."
 			print "WARNING: Continuing with next line."
 	
-	userUploads_file.close()
+	try:
+		userUploads_file.close()
+	except:
+		pass
 	
 	
 	videosJson_file = open("videos.json", "w")
