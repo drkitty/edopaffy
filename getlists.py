@@ -53,7 +53,7 @@ def main():
 			
 			print "======" + p["name"] + "======"
 			thisVidFeed = myService.GetYouTubePlaylistVideoFeed(uri=thisPlaylist.feed_link[0].href)
-			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
+			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, True)
 		
 		
 		print "======Favorites======"
@@ -67,7 +67,7 @@ def main():
 		p["description"] = ""
 		playlists.append(p)
 		
-		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
+		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, False)
 		
 		
 		print "======Liked videos======"
@@ -82,7 +82,7 @@ def main():
 		p["description"] = ""
 		playlists.append(p)
 		
-		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
+		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, False)
 	#END OF PLAYLISTS AND FAVORITES BLOCK
 	
 	
@@ -110,9 +110,8 @@ def main():
 			playlists.append(p)
 			
 			print "======" + p["name"] + "======"
-			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService)
-			
-		except:
+			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, False)
+		except gdata.service.RequestError:
 			print "WARNING: User '" + thisUserName + "' could not be found."
 			print "WARNING: Continuing with next line."
 	
@@ -131,7 +130,7 @@ def main():
 	playlistsJson_file.close()
 
 
-def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService):
+def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService, yesIndex):
 	while True:
 		for thisVid in aVidFeed.entry:
 			v = dict()
@@ -145,7 +144,10 @@ def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService):
 			#group() returns the matched string itself
 			v["title"] = thisVid.media.title.text
 			v["uploader"] = thisVid.author[0].name.text
-			v["playlistIndex"] = thisVid.position.text
+			if yesIndex:
+				v["playlistIndex"] = thisVid.position.text
+			else:
+				v["playlistIndex"] = ""
 			if thisVid.description == None:
 				v["description"] = ""
 			else:

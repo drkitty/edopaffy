@@ -97,7 +97,7 @@ try:
 						pass
 				
 				done.append(thisVideo["pageUrl"])
-		if inPlaylist["name"] == "Liked videos":
+		if thisVideo["playlistIndex"] == "":
 			symlinkPath = inPlaylist["name"] + "/" + fileName
 		else:
 			symlinkPath = inPlaylist["name"] + "/" + str(thisVideo["playlistIndex"]).zfill(3) + " " + fileName
