@@ -85,10 +85,10 @@ try:
 						print "FATAL ERROR: YouTube has apparently taken issue with the amount of bandwidth you're using."
 						print "FATAL ERROR: Wait a few minutes and try again."
 						print "FATAL ERROR: Exiting...."
-						raise
+						exit()
 					else:
 						print "FATAL ERROR: Unknown HTTP Error " + str(e.code)
-						raise
+						exit()
 				finally:
 					try:
 						f.close()
