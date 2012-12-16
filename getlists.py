@@ -153,7 +153,7 @@ def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService, yesIndex):
 			else:
 				v["description"] = thisVid.description.text
 			aVideoList.append(v)
-		print v["playlistIndex"]
+		print thisVid.position.text
 		thisNextLink = aVidFeed.GetNextLink()
 		if thisNextLink == None:
 			break
