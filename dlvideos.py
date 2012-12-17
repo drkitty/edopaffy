@@ -76,6 +76,7 @@ try:
 					f = open(filePath, "w")
 					thing = urllib2.urlopen(thisVidRawUrl)
 					f.write(thing.read())
+					done.append(thisVideo["pageUrl"])
 				except urllib2.HTTPError as e:
 					if e.code == 404:
 						print "WARNING: Video has been removed from YouTube or something like that."
@@ -95,8 +96,7 @@ try:
 						del f
 					except:
 						pass
-				
-				done.append(thisVideo["pageUrl"])
+		
 		if thisVideo["playlistIndex"] == "":
 			symlinkPath = inPlaylist["name"] + "/" + fileName
 		else:
