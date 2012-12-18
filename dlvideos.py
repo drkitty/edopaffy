@@ -12,7 +12,7 @@ try:
 	playlistsJson_file = open("playlists.json", "r")
 	playlists = json.load(playlistsJson_file)
 except:
-	print "Please run getPlaylists.py first."
+	print "Please run getlists.py first."
 	print "Exiting...."
 	exit()
 finally:
@@ -43,9 +43,10 @@ try:
 			os.makedirs(thisPlaylist["name"])
 	
 	for thisVideo in videos:
+		print ""
 		if thisVideo["title"] == "":
-			print "WARNING: Video has blank title. Skipping...."
-			continue
+			print "WARNING: Video has blank title."
+			#I'm not sure why we're supporting videos with blank titles. It just seems like the right thing to do.
 		fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
 		fileName = fileName.replace("/", "%")
 		filePath = "_videos/" + fileName
@@ -61,16 +62,16 @@ try:
 		#note that 'thisVideo' may be in multiple playlists, in which case it will have multiple entries in 'videos', one for each playlist
 		
 		if done.count(thisVideo["pageUrl"]) == 0:
-			print ""
 			print thisVideo["pageUrl"] + ":"
-			
 			print "Downloading to '" + filePath + "'...."
-			
 			
 			myProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			myProcessOutput = myProcess.communicate()
-			if re.search(r'404', myProcessOutput[1]) != None: #"404" matches in myProcessOutput[1]
-				print "WARNING: Video has been removed from YouTube or something like that."
+			# 'communicate()' returns (stdout, stderr)
+			if myProcessOutput[0] == "":
+				print "WARNING: Video was removed from YouTube or never existed in the first place."
+				print "WARNING: youtube-dl returned the following on stderr:"
+				print "\t" + myProcessOutput[1]
 				print "WARNING: Skipping video...."
 			else:
 				thisVidRawUrl = myProcessOutput[0].rstrip("\n")
