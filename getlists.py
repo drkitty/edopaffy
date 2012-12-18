@@ -142,7 +142,10 @@ def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService, yesIndex):
 					break
 			v["pageUrl"] = re.search(r'[^&]*', thisVidPageURL_dirty).group()
 			#group() returns the matched string itself
-			v["title"] = thisVid.media.title.text
+			if thisVid.media.title.text == None:
+				v["title"] = ""
+			else:
+				v["title"] = thisVid.media.title.text
 			v["uploader"] = thisVid.author[0].name.text
 			if yesIndex:
 				v["playlistIndex"] = thisVid.position.text

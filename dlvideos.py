@@ -43,6 +43,9 @@ try:
 			os.makedirs(thisPlaylist["name"])
 	
 	for thisVideo in videos:
+		if thisVideo["title"] == "":
+			print "WARNING: Video has blank title. Skipping...."
+			continue
 		fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
 		fileName = fileName.replace("/", "%")
 		filePath = "_videos/" + fileName
