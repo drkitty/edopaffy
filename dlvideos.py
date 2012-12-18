@@ -43,10 +43,6 @@ try:
 			os.makedirs(thisPlaylist["name"])
 	
 	for thisVideo in videos:
-		print ""
-		if thisVideo["title"] == "":
-			print "WARNING: Video has blank title."
-			#I'm not sure why we're supporting videos with blank titles. It just seems like the right thing to do.
 		fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
 		fileName = fileName.replace("/", "%")
 		filePath = "_videos/" + fileName
@@ -61,8 +57,12 @@ try:
 		
 		#note that 'thisVideo' may be in multiple playlists, in which case it will have multiple entries in 'videos', one for each playlist
 		
-		if done.count(thisVideo["pageUrl"]) == 0:
+		if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done'
+			print ""
 			print thisVideo["pageUrl"] + ":"
+			if thisVideo["title"] == "":
+				print "WARNING: Video has blank title."
+				#I'm not sure why we're supporting videos with blank titles. It just seems like the right thing to do.
 			print "Downloading to '" + filePath + "'...."
 			
 			myProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -71,8 +71,9 @@ try:
 			if myProcessOutput[0] == "":
 				print "WARNING: Video was removed from YouTube or never existed in the first place."
 				print "WARNING: youtube-dl returned the following on stderr:"
-				print "\t" + myProcessOutput[1]
+				print "\t" + myProcessOutput[1].rstrip("\n")
 				print "WARNING: Skipping video...."
+				continue
 			else:
 				thisVidRawUrl = myProcessOutput[0].rstrip("\n")
 				
@@ -81,6 +82,7 @@ try:
 					thing = urllib2.urlopen(thisVidRawUrl)
 					f.write(thing.read())
 					done.append(thisVideo["pageUrl"])
+					print "Done."
 				except urllib2.HTTPError as e:
 					if e.code == 404:
 						print "WARNING: Video has been removed from YouTube or something like that."
@@ -107,8 +109,9 @@ try:
 			symlinkPath = inPlaylist["name"] + "/" + str(thisVideo["playlistIndex"]).zfill(3) + " " + fileName
 		
 		if ( os.access(filePath, os.R_OK) ) and ( not os.access(symlinkPath, os.R_OK) ): #file exists but link does not
+			print ""
 			symlinkTarget = "../_videos/" + fileName
-			print "Symlinking from '" + symlinkPath + "' to '" + symlinkTarget + "'...."
+			print "Symlinking from '" + symlinkPath + "' to '" + symlinkTarget + "'."
 			os.symlink(symlinkTarget, symlinkPath)
 except:
 	print "Terminating...."
