@@ -57,6 +57,12 @@ try:
 		
 		#note that 'thisVideo' may be in multiple playlists, in which case it will have multiple entries in 'videos', one for each playlist
 		
+		if done.count(thisVideo["pageUrl"]) == 0 and os.access(filePath, os.R_OK) and os.path.getsize(filePath) > 0:
+			print ""
+			print thisVideo["pageUrl"] + " is already downloaded."
+			print "Appending to done.json..."
+			done.append(thisVideo["pageUrl"])
+		
 		if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done'
 			print ""
 			print thisVideo["pageUrl"] + ":"
@@ -85,7 +91,7 @@ try:
 					print "Done."
 				except urllib2.HTTPError as e:
 					if e.code == 404:
-						print "WARNING: Video has been removed from YouTube or something like that."
+						print "WARNING: Video was removed from YouTube or never existed in the first place."
 						print "WARNING: Skipping video...."
 						#not fatal!
 					elif e.code == 402:
