@@ -124,7 +124,7 @@ except:
 	raise
 finally:
 	done_file = open("done.json", "w")
-	json.dump(done, done_file)
+	json.dump(done, done_file, separators=(',', ':'))
 	done_file.close()
 	
 	#try:
