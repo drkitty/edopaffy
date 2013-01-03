@@ -25,7 +25,7 @@ def main():
 	
 	#START OF PLAYLISTS AND FAVORITES BLOCK
 	if len(sys.argv) == 1 or sys.argv[1] != "nopaf":
-		myService.email = raw_input("Email: ") #eventually we might cache this
+		myService.email = raw_input("Email or username: ") #eventually we might cache this
 		myService.password = getpass.getpass() #not this, though
 		
 		try:
