@@ -6,21 +6,21 @@ import subprocess
 import re
 
 try:
-	videosJson_file = open("videos.json", "r")
-	videos = json.load(videosJson_file)
+	videos_file = open("videos.json", "r")
+	videos = json.load(videos_file)
 	
-	playlistsJson_file = open("playlists.json", "r")
-	playlists = json.load(playlistsJson_file)
+	playlists_file = open("playlists.json", "r")
+	playlists = json.load(playlists_file)
 except:
 	print "Please run getlists.py first."
 	print "Exiting...."
 	exit()
 finally:
 	try:
-		videosJson_file.close()
-		playlistsJson_file.close()
+		videos_file.close()
+		playlists_file.close()
 	except:
-		pass
+		pass #Fail silently. It's no big deal if we can't close them. I hope.
 
 
 try:
@@ -32,7 +32,7 @@ finally:
 	try:
 		done_file.close()
 	except:
-		pass
+		pass #Same here.
 
 
 try:
@@ -59,7 +59,7 @@ try:
 		
 		if done.count(thisVideo["pageUrl"]) == 0 and os.access(filePath, os.R_OK) and os.path.getsize(filePath) > 0:
 			print ""
-			print thisVideo["pageUrl"] + " is already downloaded."
+			print thisVideo["pageUrl"] + " has already been downloaded."
 			print "Appending to done.json..."
 			done.append(thisVideo["pageUrl"])
 		
@@ -75,7 +75,7 @@ try:
 			myProcessOutput = myProcess.communicate()
 			# 'communicate()' returns (stdout, stderr)
 			if myProcessOutput[0] == "":
-				print "WARNING: Video was removed from YouTube or never existed in the first place."
+				print "WARNING: Video was removed from YouTube."
 				print "WARNING: youtube-dl returned the following on stderr:"
 				print "\t" + myProcessOutput[1].rstrip("\n")
 				print "WARNING: Skipping video...."
@@ -91,11 +91,11 @@ try:
 					print "Done."
 				except urllib2.HTTPError as e:
 					if e.code == 404:
-						print "WARNING: Video was removed from YouTube or never existed in the first place."
+						print "WARNING: Video was removed from YouTube."
 						print "WARNING: Skipping video...."
 						#not fatal!
 					elif e.code == 402:
-						print "FATAL ERROR: YouTube has apparently taken issue with the amount of bandwidth you're using."
+						print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
 						print "FATAL ERROR: Wait a few minutes and try again."
 						print "FATAL ERROR: Exiting...."
 						exit()
@@ -119,15 +119,25 @@ try:
 			symlinkTarget = "../_videos/" + fileName
 			print "Symlinking from '" + symlinkPath + "' to '" + symlinkTarget + "'."
 			os.symlink(symlinkTarget, symlinkPath)
+except KeyboardInterrupt:
+	#In every terminal I've used, ctrl-Cing inserts the text "^C", but no newline.
+	#That's why we need two newlines here.
+	print ""
+	print ""
+	print "Keyboard interrupt; terminating...."
 except:
-	print "Terminating...."
+	print ""
+	print "FATAL ERROR: Unhandled exception"
+	print ""
 	raise
 finally:
-	done_file = open("done.json", "w")
-	json.dump(done, done_file, separators=(',', ':'))
-	done_file.close()
-	
-	#try:
-		#f.close()
-	#except:
-		#pass
+	try:
+		done_file = open("done.json", "w")
+		json.dump(done, done_file, separators=(',', ':'))
+		done_file.close()
+	except:
+		print ""
+		print "WARNING: Could not write to done.json"
+		print "WARNING: Videos you manually removed from _videos might be redownloaded the"
+		print "WARNING: next time dlvideos.py runs"
+		print ""
