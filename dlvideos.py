@@ -79,6 +79,8 @@ try:
 				print "WARNING: youtube-dl returned the following on stderr:"
 				print "\t" + myProcessOutput[1].rstrip("\n")
 				print "WARNING: Skipping video...."
+				done.append(thisVideo["pageUrl"]) #"done" == don't retry later — removed videos don't usually return
+				#if you want to recheck all videos, delete done.json
 				continue
 			else:
 				thisVidRawUrl = myProcessOutput[0].rstrip("\n")
@@ -94,6 +96,7 @@ try:
 						print "WARNING: Video was removed from YouTube."
 						print "WARNING: Skipping video...."
 						#not fatal!
+						
 					elif e.code == 402:
 						print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
 						print "FATAL ERROR: Wait a few minutes and try again."
