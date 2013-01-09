@@ -75,14 +75,23 @@ try:
 			myProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			myProcessOutput = myProcess.communicate()
 			# 'communicate()' returns (stdout, stderr)
-			if myProcessOutput[0] == "":
-				print "WARNING: Video was removed from YouTube."
-				print "WARNING: youtube-dl returned the following on stderr:"
-				print "\t" + myProcessOutput[1].rstrip("\n")
-				print "WARNING: Skipping video...."
-				done.append(thisVideo["pageUrl"]) #"done" == don't retry later — removed videos don't usually return
-				#if you want to recheck all videos, delete done.json
-				continue
+			if myProcessOutput[0] == "": #if no output on stdout (i.e., something went wrong)
+				if re.search(r'HTTP Error 402', myProcessOutput[1]) != None: #if regex matches
+					print ""
+					print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
+					print "FATAL ERROR: Wait a few minutes and try again."
+					raise KeyboardInterrupt
+					#Really we should define a custom exception for terminating in a safe manner, but
+					#I don't really want to do that right now.
+				else:
+					print "WARNING: Video was removed from YouTube."
+					print "WARNING: youtube-dl returned the following on stderr:"
+					print "\t" + myProcessOutput[1].rstrip("\n")
+					print "WARNING: Skipping video...."
+					done.append(thisVideo["pageUrl"])
+					#"done" == don't retry later---removed videos don't usually come back.
+					#If you want to recheck all videos, delete done.json
+					continue #jump to next iteration
 			else:
 				thisVidRawUrl = myProcessOutput[0].rstrip("\n")
 				
@@ -128,7 +137,7 @@ except KeyboardInterrupt:
 	#That's why we need two newlines here.
 	print ""
 	print ""
-	print "Keyboard interrupt; terminating...."
+	print "Terminating...."
 except:
 	print ""
 	print "FATAL ERROR: Unhandled exception"
