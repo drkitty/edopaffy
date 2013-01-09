@@ -1,4 +1,5 @@
 #!/usr/bin/python2.7
+# coding=utf-8
 import gdata.youtube
 import gdata.youtube.service
 import re
