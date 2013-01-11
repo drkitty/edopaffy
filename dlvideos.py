@@ -76,13 +76,19 @@ try:
 			myProcessOutput = myProcess.communicate()
 			# 'communicate()' returns (stdout, stderr)
 			if myProcessOutput[0] == "": #if no output on stdout (i.e., something went wrong)
-				if re.search(r'HTTP Error 402', myProcessOutput[1]) != None: #if regex matches
+				if re.search('HTTP Error 402', myProcessOutput[1]) != None: #if regex matches
 					print ""
 					print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
 					print "FATAL ERROR: Wait a few minutes and try again."
 					raise KeyboardInterrupt
 					#Really we should define a custom exception for terminating in a safe manner, but
 					#I don't really want to do that right now.
+				elif re.search('urlopen error', myProcessOutput[1]) != None:
+					print ""
+					print "FATAL ERROR: Cannot connect to YouTube"
+					print "FATAL ERROR: You probably don't have an Internet connection"
+					raise KeyboardInterrupt
+					#Same as above.
 				else:
 					print "WARNING: Video was removed from YouTube."
 					print "WARNING: youtube-dl returned the following on stderr:"
