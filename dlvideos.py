@@ -152,7 +152,8 @@ except:
 finally:
 	try:
 		done_file = open("done.json", "w")
-		json.dump(done, done_file, separators=(',', ':'))
+		json.dump(done, done_file, separators=(',', ':'), indent=0)
+		#`indent=0` inserts newlines but doesn't actually indent.
 		done_file.close()
 	except:
 		print ""

@@ -28,6 +28,8 @@ def main():
 	if len(sys.argv) == 1 or sys.argv[1] != "nopaf":
 		myService.email = raw_input("Email or username: ") #eventually we might cache this
 		myService.password = getpass.getpass() #not this, though
+		print ""
+		print ""
 		
 		try:
 			myService.ProgrammaticLogin()
