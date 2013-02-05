@@ -68,10 +68,11 @@ def main():
 					print thisVideo["pageUrl"] + " has already been downloaded."
 					done.append(thisVideo["pageUrl"])
 				else:
-					print thisVideo["pageUrl"] + " did not download completely."
-					print "Backing up incomplete video...."
+					print "WARNING: " + thisVideo["pageUrl"] + " did not download completely."
+					#FIXME: should this be a warning or an error?
+					print "WARNING: Backing up incomplete video...."
 					os.rename(filePath, "_incomplete/" + fileName)
-					print "Video will now be re-downloaded."
+					print "WARNING: Video will now be re-downloaded."
 			
 			if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done.json'
 				print ""
@@ -79,8 +80,8 @@ def main():
 				if thisVideo["title"] == "":
 					print "WARNING: Video has blank title."
 					#I'm not sure why we're supporting videos with blank titles. It just seems like the right thing to do.
-				print "Downloading to '" + filePath + "'...."
 				
+				print "Retrieving raw video URL...."
 				youtube_dlProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				youtube_dlProcessOutput = youtube_dlProcess.communicate()
 				# 'communicate()' returns (stdout, stderr)
@@ -104,44 +105,53 @@ def main():
 						print "\t" + youtube_dlProcessOutput[1].rstrip("\n")
 						print "WARNING: Skipping video...."
 						done.append(thisVideo["pageUrl"])
-						#"done" == don't retry later---removed videos don't usually come back.
+						#"done" means don't retry later---removed videos don't usually come back.
 						#If you want to recheck all videos, delete done.json
 						continue #jump to next iteration
 				else:
 					thisVidRawUrl = youtube_dlProcessOutput[0].rstrip("\n")
 					
-					try:
-						f = open(filePath, "w")
-						payload = urllib2.urlopen(thisVidRawUrl)
-						f.write(payload.read())
-						if videoIsComplete(filePath):
-							done.append(thisVideo["pageUrl"])
-							print "Done."
-						else:
-							print "Video did not download completely."
-							print "Backing up incomplete video...."
-							os.rename(filePath, "_incomplete/" + fileName)
-							print "Video will be re-downloaded next run."
-					except urllib2.HTTPError as e:
-						if e.code == 404:
-							print "WARNING: Video was removed from YouTube."
-							print "WARNING: Skipping video...."
-							#not fatal!
-							
-						elif e.code == 402:
-							print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
-							print "FATAL ERROR: Wait a few minutes and try again."
-							print "FATAL ERROR: Exiting...."
-							exit()
-						else:
-							print "FATAL ERROR: Unknown HTTP Error " + str(e.code)
-							exit()
-					finally:
+					tryAgain = True
+					while tryAgain:
 						try:
-							f.close()
-							del f
-						except:
-							pass #silently fail
+							print "Downloading to '" + filePath + "'...."
+							f = open(filePath, "w")
+							payload = urllib2.urlopen(thisVidRawUrl)
+							f.write(payload.read())
+							if videoIsComplete(filePath):
+								done.append(thisVideo["pageUrl"])
+								print "Done."
+								tryAgain = False
+							else:
+								print "WARNING: Video did not download completely."
+								#FIXME: should this be a warning or an error?
+								#print "Backing up incomplete video...."
+								#os.rename(filePath, "_incomplete/" + fileName)
+								#It turns out that renaming (moving) an open file is a dumb idea.
+								print "WARNING: Video will now be re-downloaded."
+								#tryAgain remains True
+						except urllib2.HTTPError as e:
+							if e.code == 404:
+								print "WARNING: Video was removed from YouTube."
+								print "WARNING: Skipping video...."
+								done.append(thisVideo["pageUrl"])
+								tryAgain = False
+								#not fatal!
+							elif e.code == 402:
+								print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
+								print "FATAL ERROR: Wait a few minutes and try again."
+								print "FATAL ERROR: Exiting...."
+								exit()
+							else:
+								print "FATAL ERROR: Unknown HTTP Error " + str(e.code)
+								exit()
+						finally:
+							try:
+								f.close()
+							except:
+								pass #silently fail
+							finally:
+								del f
 			
 			if thisVideo["playlistIndex"] == "":
 				symlinkPath = inPlaylist["name"] + "/" + fileName
@@ -181,11 +191,12 @@ def main():
 def videoIsComplete(filePath):
 	ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec', 'copy', '-f', 'rawvideo', '-y', '/dev/null']
 	ffmpegProcess = subprocess.Popen(ffmpegArgList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	#global ffmpegOutput
 	ffmpegOutput = ffmpegProcess.communicate()
-
-	#print ffmpegOutput[1]
 	linesWithTruncating = re.findall(r'^Truncating.*', ffmpegOutput[1], re.MULTILINE)
+	#exit()
 	if len(linesWithTruncating) == 0:
+		#print "ffmpeg didn't Truncate! Hooray!"
 		return True
 	else:
 		for thisLine in linesWithTruncating:
