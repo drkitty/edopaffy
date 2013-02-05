@@ -64,7 +64,7 @@ try:
 			print "Appending to done.json..."
 			done.append(thisVideo["pageUrl"])
 		
-		if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done'
+		if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done.json'
 			print ""
 			print thisVideo["pageUrl"] + ":"
 			if thisVideo["title"] == "":
@@ -126,7 +126,7 @@ try:
 						f.close()
 						del f
 					except:
-						pass
+						pass #silently fail
 		
 		if thisVideo["playlistIndex"] == "":
 			symlinkPath = inPlaylist["name"] + "/" + fileName
