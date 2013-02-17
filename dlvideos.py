@@ -121,6 +121,7 @@ def main():
 							f = open(filePath, "w")
 							payload = urllib2.urlopen(thisVidRawUrl)
 							f.write(payload.read())
+							f.close()
 							if videoIsComplete(filePath):
 								done.append(thisVideo["pageUrl"])
 								print "Done."
@@ -154,7 +155,8 @@ def main():
 								exit()
 						finally:
 							try:
-								f.close()
+								if not f.closed:
+									f.close()
 							except:
 								pass #silently fail
 							finally:
