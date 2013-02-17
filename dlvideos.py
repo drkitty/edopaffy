@@ -72,6 +72,9 @@ def main():
 					#FIXME: should this be a warning or an error?
 					print "WARNING: Backing up incomplete video...."
 					os.rename(filePath, "_incomplete/" + fileName)
+					#RATIONALE: It might have been a long time since the video was downloaded,
+					#           so we back it up in case it was removed from YouTube in the
+					#           intervening time.
 					print "WARNING: Video will now be re-downloaded."
 			
 			if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done.json'
@@ -125,10 +128,14 @@ def main():
 							else:
 								print "WARNING: Video did not download completely."
 								#FIXME: should this be a warning or an error?
+
 								#print "Backing up incomplete video...."
 								#os.rename(filePath, "_incomplete/" + fileName)
-								#It turns out that renaming (moving) an open file is a dumb idea.
-								print "WARNING: Video will now be re-downloaded."
+								#RATIONALE: We just downloaded the video, so it's very unlikely
+								#           that it has just now been removed from YouTube;
+								#           thus there's no need to back it up.
+
+								print "WARNING: It will now be re-downloaded."
 								#tryAgain remains True
 						except urllib2.HTTPError as e:
 							if e.code == 404:
