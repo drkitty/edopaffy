@@ -20,27 +20,27 @@ def main():
 	#But please don't do that.)
 	myService.client_id = "100908745387.apps.googleusercontent.com"
 	#Same here.
-	
+
 	videos = []
 	playlists = []
-	
+
 	#START OF PLAYLISTS AND FAVORITES BLOCK
 	if len(sys.argv) == 1 or sys.argv[1] != "nopaf":
 		myService.email = raw_input("Email or username: ") #eventually we might cache this
 		myService.password = getpass.getpass() #not this, though
 		print ""
 		print ""
-		
+
 		try:
 			myService.ProgrammaticLogin()
 		except:
 			print "FATAL ERROR: Invalid email or password."
 			exit()
-		
+
 		userEntry = myService.GetYouTubeUserEntry(username="default") #i.e., currently logged-in user (you)
 		userID = re.search(r'(?<=users/).*', userEntry.id.text).group()
-		
-		
+
+
 		playlistFeed = myService.GetYouTubePlaylistFeed(username="default")
 		for thisPlaylist in playlistFeed.entry:
 			p = dict()
@@ -53,14 +53,14 @@ def main():
 			else:
 				p["description"] = thisPlaylistDescription
 			playlists.append(p)
-			
+
 			print "======" + p["name"] + "======"
 			thisVidFeed = myService.GetYouTubePlaylistVideoFeed(uri=thisPlaylist.feed_link[0].href)
 			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, True)
-		
-		
+
+
 		print "======Favorites======"
-		
+
 		thisPlaylistID = "FL" + userID
 		thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
 		p = dict()
@@ -69,12 +69,12 @@ def main():
 		p["creator"] = thisVidFeed.author[0].name.text
 		p["description"] = ""
 		playlists.append(p)
-		
+
 		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, False)
-		
-		
+
+
 		print "======Liked videos======"
-		
+
 		thisPlaylistID = "LL" + userID
 		thisVidFeed = myService.GetYouTubePlaylistVideoFeed(playlist_id=thisPlaylistID)
 		thisPlaylistTitle = thisVidFeed.title.text
@@ -84,11 +84,11 @@ def main():
 		p["creator"] = thisVidFeed.author[0].name.text
 		p["description"] = ""
 		playlists.append(p)
-		
+
 		processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, False)
 	#END OF PLAYLISTS AND FAVORITES BLOCK
-	
-	
+
+
 	try:
 		userUploads_file = open("user-uploads.txt", "r")
 	except:
@@ -98,7 +98,7 @@ def main():
 		if thisLine == "":
 			print "INFO: Ignoring blank line in user-uploads.txt"
 			continue
-		
+
 		thisUserName = thisLine
 		try:
 			thisUserID_dirty = myService.GetYouTubeUserEntry(username=thisUserName).id.text
@@ -111,23 +111,23 @@ def main():
 			p["creator"] = thisVidFeed.author[0].name.text
 			p["description"] = ""
 			playlists.append(p)
-			
+
 			print "======" + p["name"] + "======"
 			processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, False)
 		except gdata.service.RequestError:
 			print "WARNING: User '" + thisUserName + "' could not be found."
 			print "WARNING: Continuing with next line."
-	
+
 	try:
 		userUploads_file.close()
 	except:
 		pass
-	
-	
+
+
 	videosJson_file = open("videos.json", "w")
 	json.dump(videos, videosJson_file, separators=(',', ':'), indent=1)
 	videosJson_file.close()
-	
+
 	playlistsJson_file = open("playlists.json", "w")
 	json.dump(playlists, playlistsJson_file, separators=(',', ':'), indent=1)
 	playlistsJson_file.close()
@@ -138,7 +138,7 @@ def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService, yesIndex):
 		for thisVid in aVidFeed.entry:
 			v = dict()
 			v["playlistIdOrUrl"] = playlistIdOrUrl
-			
+
 			for thisLink in thisVid.link:
 				thisVidPageURL_dirty = thisLink.href
 				if re.search(r'^https://www.youtube.com/watch', thisVidPageURL_dirty) != None:

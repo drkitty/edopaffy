@@ -10,7 +10,7 @@ def main():
 	try:
 		videos_file = open("videos.json", "r")
 		videos = json.load(videos_file)
-		
+
 		playlists_file = open("playlists.json", "r")
 		playlists = json.load(playlists_file)
 	except:
@@ -45,12 +45,12 @@ def main():
 		for thisPlaylist in playlists:
 			if not os.access(thisPlaylist["name"], os.F_OK):
 				os.makedirs(thisPlaylist["name"])
-		
+
 		for thisVideo in videos:
 			fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
 			fileName = fileName.replace("/", "%")
 			filePath = "_videos/" + fileName
-			
+
 			#'filter(func, list)' returns the item(s) in 'list' for which func(item) is True
 			#'lambda arg: foo' defines an anonymous (unnamed) function that takes 'arg' as an input and returns 'foo'
 			#so this lambda returns True or False depending on whether the key "idOrUrl" maps to the value thisVideo["pageUrl"]
@@ -58,9 +58,9 @@ def main():
 			#'[0]' (at the end of the line) selects the first (and only) item in the list
 			inPlaylist = filter(lambda pl: pl["idOrUrl"] == thisVideo["playlistIdOrUrl"], playlists)[0]
 			#thus, 'inPlaylist' is a dictionary describing the playlist in which 'thisVideo' resides
-			
+
 			#note that 'thisVideo' may be in multiple playlists, in which case it will have multiple entries in 'videos', one for each playlist
-			
+
 			if done.count(thisVideo["pageUrl"]) == 0 and os.access(filePath, os.R_OK) and os.path.getsize(filePath) > 0:
 				print ""
 				print filePath
@@ -76,14 +76,14 @@ def main():
 					#           so we back it up in case it was removed from YouTube in the
 					#           intervening time.
 					print "WARNING: Video will now be re-downloaded."
-			
+
 			if done.count(thisVideo["pageUrl"]) == 0: #thisVideo["pageUrl"] does not appear in 'done.json'
 				print ""
 				print thisVideo["pageUrl"] + ":"
 				if thisVideo["title"] == "":
 					print "WARNING: Video has blank title."
 					#I'm not sure why we're supporting videos with blank titles. It just seems like the right thing to do.
-				
+
 				print "Retrieving raw video URL...."
 				youtube_dlProcess = subprocess.Popen(['youtube-dl', '-g', thisVideo["pageUrl"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				youtube_dlProcessOutput = youtube_dlProcess.communicate()
@@ -113,7 +113,7 @@ def main():
 						continue #jump to next iteration
 				else:
 					thisVidRawUrl = youtube_dlProcessOutput[0].rstrip("\n")
-					
+
 					tryAgain = True
 					while tryAgain:
 						try:
@@ -161,12 +161,12 @@ def main():
 								pass #silently fail
 							finally:
 								del f
-			
+
 			if thisVideo["playlistIndex"] == "":
 				symlinkPath = inPlaylist["name"] + "/" + fileName
 			else:
 				symlinkPath = inPlaylist["name"] + "/" + str(thisVideo["playlistIndex"]).zfill(3) + " " + fileName
-			
+
 			if ( os.access(filePath, os.R_OK) ) and ( not os.access(symlinkPath, os.R_OK) ): #file exists but link does not
 				print ""
 				symlinkTarget = "../_videos/" + fileName
