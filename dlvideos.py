@@ -7,6 +7,7 @@ import subprocess
 import re
 
 def main():
+	errorNumber = 0
 	try:
 		videos_file = open("videos.json", "r")
 		videos = json.load(videos_file)
@@ -178,10 +179,12 @@ def main():
 		print ""
 		print ""
 		print "Terminating...."
+		errorNumber += 1
 	except:
 		print ""
 		print "FATAL ERROR: Unhandled exception"
 		print ""
+		errorNumber += 2
 		raise
 	finally:
 		try:
@@ -195,6 +198,9 @@ def main():
 			print "WARNING: Videos you manually removed from _videos might be redownloaded the"
 			print "WARNING: next time dlvideos.py runs"
 			print ""
+			errorNumber += 4
+		finally:
+			exit(errorNumber)
 
 
 def videoIsComplete(filePath):
