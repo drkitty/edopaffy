@@ -133,9 +133,9 @@ def main():
 								+ "stderr:"
 						print "\t" + youtube_dlProcessOutput[1].rstrip("\n")
 						print "WARNING: Skipping video...."
-						done.append(thisVideo["pageUrl"])
 						# "done" may not be the best description, but it has
 						# the correct effect.
+						done.append(thisVideo["pageUrl"])
 						continue
 				else:
 					thisVidRawUrl = youtube_dlProcessOutput[0].rstrip("\n")
@@ -222,8 +222,8 @@ def main():
 	finally:
 		try:
 			done_file = open("done.json", "w")
-			json.dump(done, done_file, separators=(',', ':'), indent=0)
 			# `indent=0` inserts newlines but doesn't actually indent.
+			json.dump(done, done_file, separators=(',', ':'), indent=0)
 			done_file.close()
 		except:
 			print ""
@@ -251,7 +251,6 @@ def videoIsComplete(filePath):
 		for thisLine in linesWithTruncating:
 			print "\t" + thisLine
 		return False
-	return True
 
 if __name__ == "__main__":
 	main()
