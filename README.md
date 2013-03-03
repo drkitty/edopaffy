@@ -50,7 +50,7 @@ Prompt for the user's YouTube username (or associated email) and password. Then 
 
 If the switch <code>nopaf</code> is given, don't prompt for a username and password and only download category 4.
 
-To download a set of users' most recent 1000 uploads, put each such usernames (e.g., “anjunabeats” in “http://www.youtube.com/user/anjunabeats”), one per line, in <code>user-uploads.txt</code>.
+To download a set of users' most recent 1000 uploads, put each such usernames (e.g., <code>anjunabeats</code> in <code>http://www.youtube.com/user/anjunabeats</code>), one per line, in <code>user-uploads.txt</code>.
 
 (Due to technical limitations in gdata and laziness on the author's part, the aforementioned 1000-uploads-per-user limit is unlikely to change. Sorry.)
 
