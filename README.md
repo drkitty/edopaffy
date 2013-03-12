@@ -58,8 +58,7 @@ To download a set of users' most recent 1000 uploads, put each such usernames (e
 #### dlvideos
 
 	dlvideos
-<!-- test1 -->
- <!-- test2 -->
+
 If done.json exists, ignore every video whose page URL appears there. For each non-ignored video that's still available on YouTube, construct a filename and check to see if a file by that name already exists. If it does, check whether it was downloaded completely (using ffmpeg). If the file doesn't exist or it's incomplete, (re)download it until the download succeeds.
 
 (As a consequence, you can delete done.json to force dlvideos to recheck every single video for completeness, although I'm not sure why you'd want to.)
