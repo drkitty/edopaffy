@@ -52,13 +52,14 @@ If the switch <code>nopaf</code> is given, don't prompt for a username and passw
 
 To download a set of users' most recent 1000 uploads, put each such usernames (e.g., <code>anjunabeats</code> in <code>http://www.youtube.com/user/anjunabeats</code>), one per line, in <code>user-uploads.txt</code>.
 
-(Due to technical limitations in gdata<!-- and laziness on the author's part-->, the aforementioned 1000-uploads-per-user limit is unlikely to change. Sorry.)
+(Due to technical limitations in gdata, the aforementioned 1000-uploads-per-user limit is unlikely to change. Sorry.)
 
 
 #### dlvideos
 
 	dlvideos
-
+<!-- test1 -->
+ <!-- test2 -->
 If done.json exists, ignore every video whose page URL appears there. For each non-ignored video that's still available on YouTube, construct a filename and check to see if a file by that name already exists. If it does, check whether it was downloaded completely (using ffmpeg). If the file doesn't exist or it's incomplete, (re)download it until the download succeeds.
 
 (As a consequence, you can delete done.json to force dlvideos to recheck every single video for completeness, although I'm not sure why you'd want to.)
