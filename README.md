@@ -15,14 +15,14 @@
 	* Arch: <code>python2-gdata</code>
 	* Ubuntu: <code>python-gdata</code>
 	* If it's not in your distros, get it [here](http://code.google.com/p/gdata-python-client/).
-* ffmpeg
+* <code>ffmpeg</code>
 	* Arch and Ubuntu: <code>ffmpeg</code>
 	* If it's not in your distros, get it [here](http://ffmpeg.org/download.html).
 
 ## "Installation"
 
-	git clone git://github.com/drkitty/edopaffy.git
-	cd edopaffy
+	$ git clone git://github.com/drkitty/edopaffy.git
+	$ cd edopaffy
 
 (That's it!)
 
@@ -30,12 +30,12 @@
 
 The usual usage is
 
-	getlists
-	dlvideos
+	$ getlists
+	$ dlvideos
 
-You can press Ctrl-C to interrupt <code>dlvideos</code> at any time. (Don't hold Ctrl-C, as that can cause problems.) To resume downloading, run <code>dlvideos</code> again. Once <code>dlvideos</code> exits without an error message, that means it's done!
+You can press Ctrl-C to interrupt <code>dlvideos</code> at any time. (Don't hold Ctrl-C, as that can cause problems.) To resume downloading, simply run it again. Once it exits without an error message, that means it's done!
 
-To update <code>edopaffy</code>'s list of videos to download, re-run <code>getlists</code>.
+To update <code>edopaffy</code>'s list of videos to download, re-run <code>getlists</code>. Then run <code>dlvideos</code> again to download them.
 
 ### getlists
 
@@ -52,16 +52,19 @@ If the switch <code>nopaf</code> is given, don't prompt for a username and passw
 
 To download a set of users' most recent 1000 uploads, put each such usernames (e.g., <code>anjunabeats</code> in <code>http://www.youtube.com/user/anjunabeats</code>), one per line, in <code>user-uploads.txt</code>.
 
-(Due to technical limitations in gdata and laziness on the author's part, the aforementioned 1000-uploads-per-user limit is unlikely to change. Sorry.)
+(Due to technical limitations in gdata<!-- and laziness on the author's part-->, the aforementioned 1000-uploads-per-user limit is unlikely to change. Sorry.)
 
 
 #### dlvideos
 
-Info on <code>dlvideos</code> is coming soon!
-
-<!--
-
 	dlvideos
 
-If done.json exists, ignore every video whose page URL appears there. For each non-ignored video that's still available on YouTube, construct a filename and check to see if a file by that name already exists
--->
+If done.json exists, ignore every video whose page URL appears there. For each non-ignored video that's still available on YouTube, construct a filename and check to see if a file by that name already exists. If it does, check whether it was downloaded completely (using ffmpeg). If the file doesn't exist or it's incomplete, (re)download it until the download succeeds.
+
+(As a consequence, you can delete done.json to force dlvideos to recheck every single video for completeness, although I'm not sure why you'd want to.)
+
+#### Exit status
+The exit status code is the sum of all the following values that apply:
+* 1 = YouTube returned an HTTP 402 status code (which YouTube uses to indicate excessive bandwidth usage) or the user pressed Ctrl-C.
+* 2 = An unhandled exception was encountered.
+* 4 = done.json could not be written.
