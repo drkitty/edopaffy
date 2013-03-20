@@ -93,7 +93,7 @@ def main():
 					# if regex matches....
 					if re.search('HTTP Error 402', youtube_dlProcessOutput[1]) \
 							!= None:
-						bandwidthError()
+						raise BandwidthError
 					elif re.search('urlopen error', \
 							youtube_dlProcessOutput[1]) != None:
 						print ""
@@ -147,7 +147,7 @@ def main():
 								tryAgain = False
 								# not fatal!
 							elif e.code == 402:
-								bandwidthError();
+								raise bandwidthError
 							else:
 								print "FATAL ERROR: Unknown HTTP Error " \
 										+ str(e.code)
@@ -182,12 +182,18 @@ def main():
 		print ""
 		print ""
 		print "Terminating...."
-		errorNumber += 1
+		# TODO: This should be a constant or whatever Python has instead
+		errorNumber += 2**0
+	except BandwidthError:
+		print ""
+		print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
+		print "FATAL ERROR: Wait a few minutes and try again."
+		errorNumber += 2**1
 	except:
 		print ""
 		print "FATAL ERROR: Unhandled exception"
 		print ""
-		errorNumber += 2
+		errorNumber += 2**7
 		raise
 	finally:
 		try:
@@ -202,12 +208,16 @@ def main():
 					+ "be redownloaded the"
 			print "WARNING: next time dlvideos.py runs"
 			print ""
-			errorNumber += 4
+			errorNumber += 2**3
 		finally:
 			#if traceback.format_exc() != "None\n":
-			if errorNumber != 0:
+			if errorNumber & 2**7 != 0:
 				print traceback.format_exc(),
 			exit(errorNumber)
+
+
+class BandwidthError(Exception):
+	pass
 
 
 def getContainingPlaylist(playlists, video):
@@ -234,15 +244,6 @@ def prepareDirectories(playlists):
 		if not os.access(thisPlaylist["name"], os.F_OK):
 			os.makedirs(thisPlaylist["name"])
 	#raise IOError
-
-def bandwidthError():
-	print ""
-	print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
-	print "FATAL ERROR: Wait a few minutes and try again."
-	# Really we should define a custom exception for
-	# terminating in a safe manner, but I don't want to do
-	# that right now.
-	raise KeyboardInterrupt
 
 def videoIsComplete(filePath):
 	ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec', \
