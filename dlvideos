@@ -5,9 +5,11 @@ import urllib2
 import json
 import subprocess
 import re
+import sys, traceback
 
 def main():
 	errorNumber = 0
+
 	try:
 		videos_file = open("videos.json", "r")
 		videos = json.load(videos_file)
@@ -40,36 +42,16 @@ def main():
 
 
 	try:
-		if not os.access("_videos", os.F_OK):
-			os.makedirs("_videos")
-		if not os.access("_incomplete", os.F_OK):
-			os.makedirs("_incomplete")
-		for thisPlaylist in playlists:
-			if not os.access(thisPlaylist["name"], os.F_OK):
-				os.makedirs(thisPlaylist["name"])
+		prepareDirectories(playlists)
 
 		for thisVideo in videos:
 			fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
 			fileName = fileName.replace("/", "%")
 			filePath = "_videos/" + fileName
 
+			containingPlaylist = getContainingPlaylist(playlists, thisVideo)
 
-			# 'filter(func, list)' returns the item(s) in 'list' for which
-			# func(item) is True.
-
-			# The lambda returns a function that takes a playlist and returns
-			# True if the playlist's "idOrUrl" equals
-			# thisVideo["playlistIdOrUrl"] and False otherwise.
-
-			# The filter statement as a whole returns a list containing the item
-			# in 'playlists' that has the specified "idOrUrl".
-
-			# '[0]' selects the first (and only) item in the list.
-
-			inPlaylist = filter(lambda pl: pl["idOrUrl"] == \
-					thisVideo["playlistIdOrUrl"], playlists)[0]
-
-			# Thus, 'inPlaylist' is a dictionary describing the playlist in
+			# 'containingPlaylist' is a dictionary describing the playlist in
 			# which 'thisVideo' resides.
 
 			# Note that 'thisVideo' may be in multiple playlists, in which case
@@ -180,9 +162,9 @@ def main():
 								del f
 
 			if thisVideo["playlistIndex"] == "":
-				symlinkPath = inPlaylist["name"] + "/" + fileName
+				symlinkPath = containingPlaylist["name"] + "/" + fileName
 			else:
-				symlinkPath = inPlaylist["name"] + "/" \
+				symlinkPath = containingPlaylist["name"] + "/" \
 						+ str(thisVideo["playlistIndex"]).zfill(3) + " " \
 						+ fileName
 
@@ -222,7 +204,36 @@ def main():
 			print ""
 			errorNumber += 4
 		finally:
+			#if traceback.format_exc() != "None\n":
+			if errorNumber != 0:
+				print traceback.format_exc(),
 			exit(errorNumber)
+
+
+def getContainingPlaylist(playlists, video):
+	# 'filter(func, list)' returns the items in 'list' for which func(item) is
+	# True.
+
+	# The lambda returns a function that takes a playlist and returns True if
+	# the playlist's "idOrUrl" equals video["playlistIdOrUrl"] and False otherwise.
+
+	# The filter statement as a whole returns a list containing the item in
+	# 'playlists' that has the specified "idOrUrl".
+
+	# '[0]' selects the first (and only) item in the list.
+
+	return filter(lambda pl: pl["idOrUrl"] == \
+			video["playlistIdOrUrl"], playlists)[0]
+
+def prepareDirectories(playlists):
+	if not os.access("_videos", os.F_OK):
+		os.makedirs("_videos")
+	if not os.access("_incomplete", os.F_OK):
+		os.makedirs("_incomplete")
+	for thisPlaylist in playlists:
+		if not os.access(thisPlaylist["name"], os.F_OK):
+			os.makedirs(thisPlaylist["name"])
+	#raise IOError
 
 def bandwidthError():
 	print ""
