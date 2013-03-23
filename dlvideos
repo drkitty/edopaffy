@@ -96,12 +96,7 @@ def main():
 						raise BandwidthError
 					elif re.search('urlopen error', \
 							youtube_dlProcessOutput[1]) != None:
-						print ""
-						print "FATAL ERROR: Cannot connect to YouTube"
-						print "FATAL ERROR: You probably don't have an " \
-								+ "Internet connection"
-						# Same as above.
-						raise KeyboardInterrupt
+						raise NoConnection
 					else:
 						print "WARNING: Video was removed from YouTube."
 						print "WARNING: youtube-dl returned the following on " \
@@ -147,11 +142,9 @@ def main():
 								tryAgain = False
 								# not fatal!
 							elif e.code == 402:
-								raise bandwidthError
+								raise BandwidthError
 							else:
-								print "FATAL ERROR: Unknown HTTP Error " \
-										+ str(e.code)
-								exit()
+								raise UnknownHttpStatus(e.code)
 						finally:
 							try:
 								if not f.closed:
@@ -184,11 +177,19 @@ def main():
 		print "Terminating...."
 		# TODO: This should be a constant or whatever Python has instead
 		errorNumber += 2**0
+	except NoConnection:
+		print ""
+		print "FATAL ERROR: Cannot connect to YouTube"
+		print "FATAL ERROR: You probably don't have an " + "Internet connection"
+		errorNumber += 2**4
 	except BandwidthError:
 		print ""
 		print "FATAL ERROR: YouTube thinks you've used too much bandwidth."
 		print "FATAL ERROR: Wait a few minutes and try again."
 		errorNumber += 2**1
+	except UnknownHttpStatus as e:
+		print "FATAL ERROR: Unknown HTTP status code " + str(e.status)
+		errorNumber += 2**6
 	except:
 		print ""
 		print "FATAL ERROR: Unhandled exception"
@@ -216,6 +217,13 @@ def main():
 			exit(errorNumber)
 
 
+class NoConnection(Exception):
+	pass
+
+class UnknownHttpStatus(Exception):
+	def __init__(self, _code):
+		self.code = _code
+
 class BandwidthError(Exception):
 	pass
 
@@ -225,7 +233,8 @@ def getContainingPlaylist(playlists, video):
 	# True.
 
 	# The lambda returns a function that takes a playlist and returns True if
-	# the playlist's "idOrUrl" equals video["playlistIdOrUrl"] and False otherwise.
+	# the playlist's "idOrUrl" equals video["playlistIdOrUrl"] and False
+	# otherwise.
 
 	# The filter statement as a whole returns a list containing the item in
 	# 'playlists' that has the specified "idOrUrl".
@@ -243,7 +252,6 @@ def prepareDirectories(playlists):
 	for thisPlaylist in playlists:
 		if not os.access(thisPlaylist["name"], os.F_OK):
 			os.makedirs(thisPlaylist["name"])
-	#raise IOError
 
 def videoIsComplete(filePath):
 	ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec', \
