@@ -93,10 +93,9 @@ def main():
 				while tryAgain:
 					try:
 						print "Downloading to '" + filePath + "'...."
-						f = open(filePath, "w")
-						payload = urllib2.urlopen(thisVidRawUrl)
-						f.write(payload.read())
-						f.close()
+
+						downloadToFile(filePath, thisVidRawUrl)
+
 						if videoIsComplete(filePath):
 							done.append(thisVideo["pageUrl"])
 							print "Done."
@@ -235,6 +234,18 @@ def getRawUrl(pageUrl):
 			return ""
 	else:
 		return youtube_dlProcessOutput[0].rstrip("\n")
+
+def downloadToFile(pathname, url):
+	try:
+		f = open(pathname, "w")
+		payload = urllib2.urlopen(url)
+		f.write(payload.read())
+	finally:
+		try:
+			if not f.closed:
+				f.close()
+		finally:
+			pass
 
 
 def getContainingPlaylist(playlists, video):
