@@ -123,14 +123,6 @@ def main():
 							raise BandwidthError
 						else:
 							raise UnknownHttpStatus(e.code)
-					finally:
-						try:
-							if not f.closed:
-								f.close()
-						except:
-							pass # silently fail
-						finally:
-							del f
 
 			if thisVideo["playlistIndex"] == "":
 				symlinkPath = containingPlaylist["name"] + "/" + fileName
