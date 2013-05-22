@@ -1,4 +1,8 @@
-=== Change video storage format ===
+=== Refactor ===
+
+Do a massive refactor so we can get at the actual program logic. This will greatly ease the storage format transition.
+
+=== Change video and playlist information storage format ===
 
 We need two files: videos.json and playlistinfo.json (or something) (old name: playlists.json)
 
