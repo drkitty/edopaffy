@@ -1,0 +1,30 @@
+=== Change video storage format ===
+
+We need two files: videos.json and playlistinfo.json (or something) (old name: playlists.json)
+
+videos.json needs a new format:
+
+[
+	{
+		"id":STRING,
+		"title":STRING,
+		"description":STRING,
+		"uploader":STRING,
+		"downloaded":BOOLEAN,
+		"gone":BOOLEAN,
+		"playlists": [
+			{
+				"idOrUrl":STRING,
+				"index":NUMBER
+			},
+			...
+		]
+	},
+	...
+]
+
+playlistinfo.json's format is probably fine. We'll see if there's any other info we need to store.
+
+=== Migrate to Python 3, if the Python gdata library ever does ===
+
+2to3 should be sufficient, since we don't really use any wacky stuff.
