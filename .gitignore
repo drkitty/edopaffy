@@ -3,3 +3,6 @@ videos.json*
 done.json*
 user-uploads.txt
 /*/
+
+# vim swap files
+.*.sw?
