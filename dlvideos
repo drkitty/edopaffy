@@ -62,7 +62,7 @@ def main():
 					os.R_OK) and os.path.getsize(filePath) > 0:
 				print ""
 				print filePath
-				if videoIsComplete(filePath):
+				if isVideoComplete(filePath):
 					print thisVideo["pageUrl"] + " has already been downloaded."
 					done.append(thisVideo["pageUrl"])
 				else:
@@ -89,40 +89,10 @@ def main():
 					continue
 				print thisVidRawUrl
 
-				tryAgain = True
-				while tryAgain:
-					try:
-						print "Downloading to '" + filePath + "'...."
-
-						downloadToFile(filePath, thisVidRawUrl)
-
-						if videoIsComplete(filePath):
-							done.append(thisVideo["pageUrl"])
-							print "Done."
-							tryAgain = False
-						else:
-							print "WARNING: Video did not download " \
-									+ "completely."
-
-							# RATIONALE: We just downloaded the video, so
-							# it's very unlikely that it has just now been
-							# removed from YouTube; thus, there's no need
-							# to back it up.
-
-							print "WARNING: It will now be re-downloaded."
-
-							# tryAgain remains True
-					except urllib2.HTTPError as e:
-						if e.code == 404:
-							print "WARNING: Video was removed from YouTube."
-							print "WARNING: Skipping video...."
-							done.append(thisVideo["pageUrl"])
-							tryAgain = False
-							# not fatal!
-						elif e.code == 402:
-							raise BandwidthError
-						else:
-							raise UnknownHttpStatus(e.code)
+				while not downloadVideo(thisVidRawUrl, thisVideo["pageUrl"],
+						filePath):
+					pass
+				done.append(thisVideo["pageUrl"])
 
 			if thisVideo["playlistIndex"] == "":
 				symlinkPath = containingPlaylist["name"] + "/" + fileName
@@ -227,7 +197,7 @@ def getRawUrl(pageUrl):
 	else:
 		return youtube_dlProcessOutput[0].rstrip("\n")
 
-def downloadToFile(pathname, url):
+def download(pathname, url):
 	try:
 		f = open(pathname, "w")
 		payload = urllib2.urlopen(url)
@@ -265,7 +235,7 @@ def prepareDirectories(playlists):
 		if not os.access(thisPlaylist["name"], os.F_OK):
 			os.makedirs(thisPlaylist["name"])
 
-def videoIsComplete(filePath):
+def isVideoComplete(filePath):
 	ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec', \
 			'copy', '-f', 'rawvideo', '-y', '/dev/null']
 	ffmpegProcess = subprocess.Popen(ffmpegArgList, stdout=subprocess.PIPE, \
@@ -279,6 +249,38 @@ def videoIsComplete(filePath):
 		for thisLine in linesWithTruncating:
 			print "\t" + thisLine
 		return False
+
+# return: did video download successfully?
+def downloadVideo(rawUrl, pageUrl, filePath):
+	try:
+		print "Downloading to '" + filePath + "'...."
+
+		download(filePath, rawUrl)
+
+		if isVideoComplete(filePath):
+			print "Done."
+			return True
+		else:
+			print "WARNING: Video did not download " \
+					+ "completely."
+
+			# RATIONALE: We just downloaded the video, so
+			# it's very unlikely that it has just now been
+			# removed from YouTube; thus, there's no need
+			# to back it up.
+
+			print "WARNING: It will now be re-downloaded."
+
+			return False
+	except urllib2.HTTPError as e:
+		if e.code == 404:
+			print "WARNING: Video was removed from YouTube."
+			print "WARNING: Skipping video...."
+			return True
+		elif e.code == 402:
+			raise BandwidthError
+		else:
+			raise UnknownHttpStatus(e.code)
 
 if __name__ == "__main__":
 	main()
