@@ -29,6 +29,10 @@ videos.json needs a new format:
 
 playlistinfo.json's format is probably fine. We'll see if there's any other info we need to store.
 
+=== Figure out why some empty json values are "" and some are null ===
+
+null is better than "", for reasons.
+
 === Migrate to Python 3, if the Python gdata library ever does ===
 
 2to3 should be sufficient, since we don't really use any wacky stuff.
