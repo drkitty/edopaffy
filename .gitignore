@@ -4,5 +4,6 @@ done.json*
 user-uploads.txt
 /*/
 
-# vim swap files
+# vim files
 .*.sw?
+.vimrc
