@@ -44,8 +44,8 @@ def main():
         prepareDirectories(playlists)
 
         for thisVideo in videos:
-            fileName = u"{} (~{})".format(thisVideo["title"], \
-                    thisVideo["uploader"])
+            fileName = u"{} (~{})".format(thisVideo["title"],
+                                          thisVideo["uploader"])
             fileName = fileName.replace("/", "%")
             filePath = "_videos/" + fileName
 
@@ -58,16 +58,18 @@ def main():
             # it will have multiple entries in 'videos', one for each playlist.
 
 
-            if done.count(thisVideo["pageUrl"]) == 0 and os.access(filePath, \
-                    os.R_OK) and os.path.getsize(filePath) > 0:
+            if (done.count(thisVideo["pageUrl"]) == 0
+                    and os.access(filePath, os.R_OK)
+                    and os.path.getsize(filePath) > 0):
                 print ""
                 print filePath
                 if isVideoComplete(filePath):
-                    print thisVideo["pageUrl"] + " has already been downloaded."
+                    print (thisVideo["pageUrl"] + " has already been "
+                           + "downloaded.")
                     done.append(thisVideo["pageUrl"])
                 else:
-                    print "WARNING: " + thisVideo["pageUrl"] + " did not " \
-                            + "download completely."
+                    print ("WARNING: " + thisVideo["pageUrl"] + " did not "
+                           + "download completely.")
                     print "WARNING: Backing up incomplete video...."
                     os.rename(filePath, "_incomplete/" + fileName)
                     # RATIONALE: It might have been a long time since the video
@@ -90,24 +92,24 @@ def main():
                 print thisVidRawUrl
 
                 while not downloadVideo(thisVidRawUrl, thisVideo["pageUrl"],
-                        filePath):
+                                        filePath):
                     pass
                 done.append(thisVideo["pageUrl"])
 
             if thisVideo["playlistIndex"] == "":
                 symlinkPath = containingPlaylist["name"] + "/" + fileName
             else:
-                symlinkPath = containingPlaylist["name"] + "/" \
-                        + str(thisVideo["playlistIndex"]).zfill(3) + " " \
-                        + fileName
+                symlinkPath = (containingPlaylist["name"] + "/"
+                               + str(thisVideo["playlistIndex"]).zfill(3) + " "
+                               + fileName)
 
             # if file exists but link does not...
-            if ( os.access(filePath, os.R_OK) ) and \
-                    ( not os.access(symlinkPath, os.R_OK) ):
+            if (os.access(filePath, os.R_OK)
+                    and not os.access(symlinkPath, os.R_OK)):
                 print ""
                 symlinkTarget = "../_videos/" + fileName
-                print "Symlinking from '" + symlinkPath + "' to '" \
-                        + symlinkTarget + "'."
+                print ("Symlinking from '" + symlinkPath + "' to '"
+                       + symlinkTarget + "'.")
                 os.symlink(symlinkTarget, symlinkPath)
     except KeyboardInterrupt:
         # In every terminal I've used, ctrl-Cing inserts the text "^C", but no
@@ -120,7 +122,7 @@ def main():
     except NoConnection:
         print ""
         print "FATAL ERROR: Cannot connect to YouTube"
-        print "FATAL ERROR: You probably don't have an " + "Internet connection"
+        print "FATAL ERROR: You probably don't have an Internet connection"
         errorNumber += 2**4
     except BandwidthError:
         print ""
@@ -145,8 +147,8 @@ def main():
         except:
             print ""
             print "WARNING: Could not write to done.json"
-            print "WARNING: Videos you manually removed from _videos might " \
-                    + "be redownloaded the"
+            print ("WARNING: Videos you manually removed from _videos might "
+                   + "be redownloaded the")
             print "WARNING: next time dlvideos.py runs"
             print ""
             errorNumber += 2**3
@@ -171,27 +173,28 @@ class BandwidthError(Exception):
 # return:     "" -> (video was removed)
 #         (else) -> raw url
 def getRawUrl(pageUrl):
-    youtube_dlProcess = subprocess.Popen(['youtube-dl', '-g', pageUrl], \
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    youtube_dlProcess = subprocess.Popen(['youtube-dl', '-g', pageUrl],
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE)
     # 'communicate()' returns (stdout, stderr)
     youtube_dlProcessOutput = youtube_dlProcess.communicate()
     # if no output on stdout (i.e., something went wrong)...
     if youtube_dlProcessOutput[0] == "":
         # if regex matches....
-        if re.search('HTTP Error 402', youtube_dlProcessOutput[1]) \
-                != None:
+        if (re.search('HTTP Error 402', youtube_dlProcessOutput[1])
+                != None):
             raise BandwidthError
-        elif re.search('urlopen error', \
-                youtube_dlProcessOutput[1]) != None:
+        elif (re.search('urlopen error',
+                        youtube_dlProcessOutput[1]) != None):
             raise NoConnection
         else:
             print "WARNING: Video was removed from YouTube."
-            print "WARNING: youtube-dl returned the following on " \
-                    + "stderr:"
+            print ("WARNING: youtube-dl returned the following on "
+                   + "stderr:")
             print "\t" + youtube_dlProcessOutput[1].rstrip("\n")
             print "WARNING: Skipping video...."
-            # "done" may not be the best description, but it has
-            # the correct effect.
+            # "done" may not be the best description, but it has the correct
+            # effect.
             done.append(thisVideo["pageUrl"])
             return ""
     else:
@@ -236,13 +239,13 @@ def prepareDirectories(playlists):
             os.makedirs(thisPlaylist["name"])
 
 def isVideoComplete(filePath):
-    ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec', \
-            'copy', '-f', 'rawvideo', '-y', '/dev/null']
-    ffmpegProcess = subprocess.Popen(ffmpegArgList, stdout=subprocess.PIPE, \
-            stderr=subprocess.PIPE)
+    ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec',
+                     'copy', '-f', 'rawvideo', '-y', '/dev/null']
+    ffmpegProcess = subprocess.Popen(ffmpegArgList, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
     ffmpegOutput = ffmpegProcess.communicate()
-    linesWithTruncating = re.findall(r'^Truncating.*', ffmpegOutput[1], \
-            re.MULTILINE)
+    linesWithTruncating = re.findall(r'^Truncating.*', ffmpegOutput[1],
+                                     re.MULTILINE)
     if len(linesWithTruncating) == 0:
         return True
     else:
@@ -261,13 +264,11 @@ def downloadVideo(rawUrl, pageUrl, filePath):
             print "Done."
             return True
         else:
-            print "WARNING: Video did not download " \
-                    + "completely."
+            print "WARNING: Video did not download completely."
 
-            # RATIONALE: We just downloaded the video, so
-            # it's very unlikely that it has just now been
-            # removed from YouTube; thus, there's no need
-            # to back it up.
+            # RATIONALE: We just downloaded the video, so it's very unlikely
+            # that it has just now been removed from YouTube; thus, there's no
+            # need to back it up.
 
             print "WARNING: It will now be re-downloaded."
 

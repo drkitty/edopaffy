@@ -13,8 +13,10 @@ import sys
 def main():
     myService = gdata.youtube.service.YouTubeService()
     myService.ssl = True
-    myService.developer_key = "AI39si6xcOAkaUaIHmKKlktQkNWA3zm6VNErFNK9SLPucm" \
-            + "whtrYPsT-lGYhSPjslE27Z5jSqsxEyWGLi4sRyiy8A2tyfS0xN5w"
+    myService.developer_key = (
+            "AI39si6xcOAkaUaIHmKKlktQkNWA3zm6VNErFNK9SLPucmwhtrYPsT-lGYhSPjslE"
+            + "27Z5jSqsxEyWGLi4sRyiy8A2tyfS0xN5w"
+    )
     # Please use your own developer key if you significantly modify this
     # software. (My dev key is not attached to a billing account, so the most
     # you can do is cause me some minor annoyance. But please don't do that.)
@@ -56,7 +58,7 @@ def main():
             playlists.append(p)
 
             print "======" + p["name"] + "======"
-            thisVidFeed = myService.GetYouTubePlaylistVideoFeed( \
+            thisVidFeed = myService.GetYouTubePlaylistVideoFeed(
                     uri=thisPlaylist.feed_link[0].href)
             processVidFeed(thisVidFeed, videos, p["idOrUrl"], myService, True)
 
@@ -64,7 +66,7 @@ def main():
         print "======Favorites======"
 
         thisPlaylistID = "FL" + userID
-        thisVidFeed = myService.GetYouTubePlaylistVideoFeed( \
+        thisVidFeed = myService.GetYouTubePlaylistVideoFeed(
                 playlist_id=thisPlaylistID)
         p = dict()
         p["name"] = thisVidFeed.title.text
@@ -79,7 +81,7 @@ def main():
         print "======Liked videos======"
 
         thisPlaylistID = "LL" + userID
-        thisVidFeed = myService.GetYouTubePlaylistVideoFeed( \
+        thisVidFeed = myService.GetYouTubePlaylistVideoFeed(
                 playlist_id=thisPlaylistID)
         thisPlaylistTitle = thisVidFeed.title.text
         p = dict()
@@ -105,12 +107,13 @@ def main():
 
         thisUserName = thisLine
         try:
-            thisUserID_dirty = myService.GetYouTubeUserEntry( \
-                    username=thisUserName).id.text
-            thisUserID = re.search('(?<=feeds/api/users/).*', \
-                    thisUserID_dirty).group()
+            thisUserID_dirty = myService.GetYouTubeUserEntry(
+                    username=thisUserName
+                    ).id.text
+            thisUserID = re.search('(?<=feeds/api/users/).*',
+                                   thisUserID_dirty).group()
             thisPlaylistID = "UU" + thisUserID
-            thisVidFeed = myService.GetYouTubePlaylistVideoFeed( \
+            thisVidFeed = myService.GetYouTubePlaylistVideoFeed(
                     playlist_id=thisPlaylistID)
             p = dict()
             p["name"] = thisUserName + "'s uploads"
@@ -148,8 +151,8 @@ def processVidFeed(aVidFeed, aVideoList, playlistIdOrUrl, aService, yesIndex):
 
             for thisLink in thisVid.link:
                 thisVidPageURL_dirty = thisLink.href
-                if re.search(r'^https://www.youtube.com/watch', \
-                        thisVidPageURL_dirty) != None:
+                if re.search(r'^https://www.youtube.com/watch',
+                             thisVidPageURL_dirty) != None:
                     break
             v["pageUrl"] = re.search(r'[^&]*', thisVidPageURL_dirty).group()
             if thisVid.media.title.text == None:
