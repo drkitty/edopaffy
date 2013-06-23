@@ -24,7 +24,7 @@ def main():
 	videos = []
 	playlists = []
 
-	if len(sys.argv) == 1 or sys.argv[1] != "nopaf":
+	if sys.argv.count("nopaf") == 0:
 		myService.email = raw_input("Email or username: ")
 		# eventually we might cache this
 		myService.password = getpass.getpass()
@@ -35,7 +35,7 @@ def main():
 			myService.ProgrammaticLogin()
 		except:
 			print "FATAL ERROR: Invalid email or password."
-			exit()
+			exit(1)
 
 		userEntry = myService.GetYouTubeUserEntry(username="default")
 		# "default" means the currently logged-in user

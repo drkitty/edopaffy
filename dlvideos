@@ -44,7 +44,8 @@ def main():
 		prepareDirectories(playlists)
 
 		for thisVideo in videos:
-			fileName = thisVideo["title"] + " (~" + thisVideo["uploader"] + ")"
+			fileName = u"{} (~{})".format(thisVideo["title"], \
+					thisVideo["uploader"])
 			fileName = fileName.replace("/", "%")
 			filePath = "_videos/" + fileName
 
@@ -167,7 +168,7 @@ class BandwidthError(Exception):
 	pass
 
 
-# return: ""     -> (video was removed)
+# return:     "" -> (video was removed)
 #         (else) -> raw url
 def getRawUrl(pageUrl):
 	youtube_dlProcess = subprocess.Popen(['youtube-dl', '-g', pageUrl], \
