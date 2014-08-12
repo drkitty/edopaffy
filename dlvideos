@@ -47,7 +47,7 @@ def main():
             fileName = u"{} (~{})".format(thisVideo["title"],
                                           thisVideo["uploader"])
             fileName = fileName.replace("/", "%")
-            filePath = "_videos/" + fileName
+            filePath = "downloads/_videos/" + fileName
 
             containingPlaylist = getContainingPlaylist(playlists, thisVideo)
 
@@ -97,11 +97,12 @@ def main():
                 done.append(thisVideo["pageUrl"])
 
             if thisVideo["playlistIndex"] == "":
-                symlinkPath = containingPlaylist["name"] + "/" + fileName
+                symlinkPath = ("downloads/" + containingPlaylist["name"]
+                               + "/" + fileName)
             else:
-                symlinkPath = (containingPlaylist["name"] + "/"
-                               + str(thisVideo["playlistIndex"]).zfill(3) + " "
-                               + fileName)
+                symlinkPath = ("downloads/" + containingPlaylist["name"]
+                               + "/" + str(thisVideo["playlistIndex"]).zfill(3)
+                               + " " + fileName)
 
             # if file exists but link does not...
             if (os.access(filePath, os.R_OK)
@@ -181,16 +182,13 @@ def getRawUrl(pageUrl):
     # if no output on stdout (i.e., something went wrong)...
     if youtube_dlProcessOutput[0] == "":
         # if regex matches....
-        if (re.search('HTTP Error 402', youtube_dlProcessOutput[1])
-                != None):
+        if re.search('HTTP Error 402', youtube_dlProcessOutput[1]) != None:
             raise BandwidthError
-        elif (re.search('urlopen error',
-                        youtube_dlProcessOutput[1]) != None):
+        elif re.search('urlopen error', youtube_dlProcessOutput[1]) != None:
             raise NoConnection
         else:
             print "WARNING: Video was removed from YouTube."
-            print ("WARNING: youtube-dl returned the following on "
-                   + "stderr:")
+            print "WARNING: youtube-dl returned the following on stderr:"
             print "\t" + youtube_dlProcessOutput[1].rstrip("\n")
             print "WARNING: Skipping video...."
             # "done" may not be the best description, but it has the correct
@@ -230,13 +228,13 @@ def getContainingPlaylist(playlists, video):
             video["playlistIdOrUrl"], playlists)[0]
 
 def prepareDirectories(playlists):
-    if not os.access("_videos", os.F_OK):
-        os.makedirs("_videos")
-    if not os.access("_incomplete", os.F_OK):
-        os.makedirs("_incomplete")
+    if not os.access("downloads/_videos", os.F_OK):
+        os.makedirs("downloads/_videos")
+    if not os.access("downloads/_incomplete", os.F_OK):
+        os.makedirs("downloads/_incomplete")
     for thisPlaylist in playlists:
-        if not os.access(thisPlaylist["name"], os.F_OK):
-            os.makedirs(thisPlaylist["name"])
+        if not os.access("downloads/" + thisPlaylist["name"], os.F_OK):
+            os.makedirs("downloads/" + thisPlaylist["name"])
 
 def isVideoComplete(filePath):
     ffmpegArgList = ['ffmpeg', '-v', 'debug', '-i', filePath, '-codec',

@@ -2,7 +2,7 @@ playlists.json*
 videos.json*
 done.json*
 user-uploads.txt
-/*/
+downloads
 
 # vim files
 .*.sw?
