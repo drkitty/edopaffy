@@ -1,6 +1,7 @@
 # edopaffy
 ###### (Easy Downloader of Playlists and Favorites from YouTube)
 
+## NOTE: Don't use this. [metatube](http://github.com/drkitty/metatube) works better.
 
 ## Dependencies
 
